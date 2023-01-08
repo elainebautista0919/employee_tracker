@@ -141,35 +141,84 @@ connection.connect((err) => {
 });
 
 // Add a role
+const addRole = () => {
+  connection.query('SELECT * FROM department', (err, departments) => {
+      if (err) console.log(err);
+      departments = departments.map((department) => {
+          return {
+              name: department.name,
+              value: department.id,
+          };
+      });
+      inquirer
+          .prompt([
+              {
+                  type: 'input',
+                  name: 'newRole',
+                  message: 'What is the new role?'
+              },
+              {
+                  type: 'input',
+                  name: 'salary',
+                  message: 'What is the salary of the new role?',
+              },
+              {
+                  type: 'list',
+                  name: 'departmentId',
+                  message: 'What is the department of the new role?',
+                  choices: departments,
+              },
+          ])
+          .then((data) => {
+              connection.query(
+                  'INSERT INTO role SET ?',
+                  {
+                      title: data.newRole,
+                      salary: data.salary,
+                      department_id: data.departmentId,
+                  },
+                  function (err) {
+                      if (err) throw err;
+                  }
+              );
+              console.log('New roleadded to employee_db database.')
+              viewRole();
+          });
+
+  });
+
+};
 
 // Add an employee
 
-// Classes
-class Department{
-  constructor(name){
-      this.name = name;
-  }
-}
 
-module.exports = Department;
 
-class Role {
-  constructor(title, salary, department_id) {
-      this.title = title;
-      this.salary = salary;
-      this.department_id = department_id;
-  }
-}
+// // Classes
+// class Department{
+//   constructor(name){
+//       this.name = name;
+//   }
+// }
 
-module.exports = Role;
+// module.exports = Department;
 
-class Employee {
-  constructor(first_name, last_name, role_id, manager_id) {
-      this.first_name = first_name;
-      this.last_name = last_name;
-      this.role_id = role_id;
-      this.manager_id = manager_id;
-  }
-}
+// class Role {
+//   constructor(title, salary, department_id) {
+//       this.title = title;
+//       this.salary = salary;
+//       this.department_id = department_id;
+//   }
+// }
 
-module.exports = Employee;
+// module.exports = Role;
+
+// class Employee {
+//   constructor(first_name, last_name, role_id, manager_id) {
+//       this.first_name = first_name;
+//       this.last_name = last_name;
+//       this.role_id = role_id;
+//       this.manager_id = manager_id;
+//   }
+// }
+
+// module.exports = Employee;
