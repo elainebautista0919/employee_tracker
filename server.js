@@ -55,27 +55,96 @@ function startPrompt() {
   }).then (answer => {
     switch (answer.action) {
       case "View all departments":
-        byDepartment();
+        viewDepartment();
         startPrompt();
         break;
 
       case "View all roles":
-        byRole();
+        viewRole();
         startPrompt();
         break;
       
       case "View all employees":
-        byEmployee();
+        viewEmployee();
         startPrompt();
         break;
+
+      case "Add a department":
+        inquirer.prompt([
+            {
+                name: "department",
+                type: "input",
+                message: "What is the new department name?",
+                validate: answer => {
+                    if (answer !== "") {
+                        return true;
+                    }
+                    return "Please enter at least one character.";
+                }
+            },
+
+        ]).then(answers => {
+            addDepartment(answers.Department);
+            startPrompt();
+        })
+        break;
       
+      case "Add a role":
+        addRole();
+        startPrompt();
+        break;
+
+      case "Add an employee":
+          addEmployee();
+          startPrompt();
+          break;
     }
   })
 }
 
 // View all departments
-function byDepartment() {
-  var department = connection.query('SELECT * FROM department', function (err, results) {
-    console.log(results);
-   })
+function viewDepartment() {
+  connection.query('SELECT * FROM department', (err, res) => {
+      if (err) throw err;
+      console.log('\n\n')
+      console.table(res);
+  });
 }
+// View all roles
+function viewRole() {
+  connection.query(`SELECT * FROM role`, 
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log('\n\n')
+                        console.table(res);
+                    });
+}
+
+// View all employees
+function viewEmployee() {
+  connection.query(`SELECT * FROM employee`, 
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log('\n\n')
+                        console.table(res);
+                    });
+}
+
+// Add a department
+function addDepartment(department) {
+
+  var department = connection.query(
+      "INSERT INTO department SET ?",
+      [department],
+      function (error, department) {
+          if (err) throw err;
+          console.log('\n\n')
+          console.table(res);
+      });
+
+  departmentTable();
+}
+
+// Add a role
+
+// Add an employee
