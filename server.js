@@ -225,7 +225,7 @@ const addEmployee = () => {
                 type: 'list',
                 name: 'managerId',
                 message: 'Please select a manager ID.',
-                choices: [1, 2, 3, 4, 5, 6, 7]
+                choices: [1, 2, 3, 4, 5, 6, 7, null]
               }
           ])
           .then((data) => {
