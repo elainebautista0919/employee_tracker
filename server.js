@@ -1,6 +1,11 @@
+// Import and require express
 const express = require('express');
 // Import and require mysql2
 const mysql = require('mysql2');
+// Import and require inquirer
+const inquirer = require("inquirer")
+// Import console table
+const cTable = require('console.table');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -10,28 +15,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Connect to database
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    // MySQL username,
-    user: 'root',
-    // MySQL password
-    password: 'password',
-    database: 'employee_db'
-  },
-  console.log(`Connected to the employee_db database.`)
-);
-
-// Query database
-db.query('SELECT * FROM department', function (err, results) {
-  console.log(results);
+const connection = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "password",
+  database: "employee_db"
 });
 
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-  res.status(404).end();
-});
+connection.connect((err) => {
+  if (err) {
+      console.log(err);
+      res.status(500);
+      return res.send("Error conencting to database.");
+  } console.log("Connected to employee_db database.");
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  // Function for inquirer to prompt data
+  runSearch();
+
+})
