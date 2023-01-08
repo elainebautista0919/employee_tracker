@@ -77,6 +77,10 @@ function startPrompt() {
       case "Add an employee":
           addEmployee();
           break;
+
+      case "Update an employee role":
+          updateEmployeeRole();
+          break;
     }
   })
 }
@@ -181,7 +185,7 @@ const addRole = () => {
                       if (err) throw err;
                   }
               );
-              console.log('New roleadded to employee_db database.')
+              console.log('New role added to employee_db database.')
               viewRole();
           });
 
@@ -190,35 +194,113 @@ const addRole = () => {
 };
 
 // Add an employee
+const addEmployee = () => {
+  connection.query('SELECT * FROM role', (err, roles) => {
+      if (err) console.log(err);
+      roles = roles.map((role) => {
+          return {
+              name: role.title,
+              value: role.id,
+          };
+      });
+      inquirer
+          .prompt([
+              {
+                type: 'input',
+                name: 'firstName',
+                message: 'What is the first name of the new employee?'
+              },
+              {
+                type: 'input',
+                name: 'lastName',
+                message: 'What is the last name of the new employee?'
+              },
+              {
+                type: 'list',
+                name: 'role',
+                message: 'What is the role of the employee?',
+                choices: roles,
+              },
+              {
+                type: 'list',
+                name: 'managerId',
+                message: 'Please select a manager ID.',
+                choices: [1, 2, 3, 4, 5, 6, 7]
+              }
+          ])
+          .then((data) => {
+              console.log(data.role);
+              connection.query(
+                  'INSERT INTO employee SET ?',
+                  {
+                    first_name: data.firstName,
+                    last_name: data.lastName,
+                    role_id: data.role,
+                    manager_id: data.managerId
+                  },
+                  (err) => {
+                    if (err) throw err;
+                      console.log('New employee added to employee_db database.');
+                      viewEmployee();
 
+                  }
+              );
+          });
 
+  });
 
-// // Classes
-// class Department{
-//   constructor(name){
-//       this.name = name;
-//   }
-// }
+};
 
-// module.exports = Department;
-
-// class Role {
-//   constructor(title, salary, department_id) {
-//       this.title = title;
-//       this.salary = salary;
-//       this.department_id = department_id;
-//   }
-// }
-
-// module.exports = Role;
-
-// class Employee {
-//   constructor(first_name, last_name, role_id, manager_id) {
-//       this.first_name = first_name;
-//       this.last_name = last_name;
-//       this.role_id = role_id;
-//       this.manager_id = manager_id;
-//   }
-// }
-
-// module.exports = Employee;
+// Update an employee role
+const updateEmployeeRole = () => {
+  connection.query('SELECT * FROM employee', (err, employees) => {
+      if (err) console.log(err);
+      employees = employees.map((employee) => {
+          return {
+              name: `${employee.first_name} ${employee.last_name}`,
+              value: employee.id,
+          };
+      });
+      connection.query('SELECT * FROM role', (err, roles) => {
+          if (err) console.log(err);
+          roles = roles.map((role) => {
+              return {
+                  name: role.title,
+                  value: role.id,
+              }
+          });
+          inquirer
+              .prompt([
+                  {
+                      type: 'list',
+                      name: 'selectEmployee',
+                      message: 'Select an employee to update.',
+                      choices: employees,
+                  },
+                  {
+                      type: 'list',
+                      name: 'selectNewRole',
+                      message: 'Select a new employee role.',
+                      choices: roles,
+                  },
+              ])
+              .then((data) => {
+                  connection.query('UPDATE employee SET ? WHERE ?',
+                      [
+                          {
+                              role_id: data.selectNewRole,
+                          },
+                          {
+                              id: data.selectEmployee,
+                          },
+                      ],
+                      function (err) {
+                          if (err) throw err;
+                      }
+                  );
+                  console.log('New employee role update to employee_db database.');
+                  viewEmployee();
+              });
+      });
+  });
+};
