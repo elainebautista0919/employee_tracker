@@ -56,47 +56,26 @@ function startPrompt() {
     switch (answer.action) {
       case "View all departments":
         viewDepartment();
-        startPrompt();
         break;
 
       case "View all roles":
         viewRole();
-        startPrompt();
         break;
       
       case "View all employees":
         viewEmployee();
-        startPrompt();
         break;
 
       case "Add a department":
-        inquirer.prompt([
-            {
-                name: "department",
-                type: "input",
-                message: "What is the new department name?",
-                validate: answer => {
-                    if (answer !== "") {
-                        return true;
-                    }
-                    return "Please enter at least one character.";
-                }
-            },
-
-        ]).then(answers => {
-            addDepartment(answers.Department);
-            startPrompt();
-        })
+        addDepartment();
         break;
       
       case "Add a role":
         addRole();
-        startPrompt();
         break;
 
       case "Add an employee":
           addEmployee();
-          startPrompt();
           break;
     }
   })
@@ -109,42 +88,88 @@ function viewDepartment() {
       console.log('\n\n')
       console.table(res);
   });
+  startPrompt();
 }
 // View all roles
 function viewRole() {
-  connection.query(`SELECT * FROM role`, 
-                    (err, res) => {
-                        if (err) throw err;
-                        console.log('\n\n')
-                        console.table(res);
-                    });
+  connection.query(`SELECT * FROM role`, (err, res) => {
+      if (err) throw err;
+      console.log('\n\n')
+      console.table(res);
+  });
+ startPrompt();
 }
 
 // View all employees
 function viewEmployee() {
-  connection.query(`SELECT * FROM employee`, 
-                    (err, res) => {
-                        if (err) throw err;
-                        console.log('\n\n')
-                        console.table(res);
-                    });
+  connection.query(`SELECT * FROM employee`, (err, res) => {
+      if (err) throw err;
+      console.log('\n\n')
+      console.table(res);
+  });
+  startPrompt();
 }
 
 // Add a department
-function addDepartment(department) {
 
-  var department = connection.query(
-      "INSERT INTO department SET ?",
-      [department],
-      function (error, department) {
-          if (err) throw err;
-          console.log('\n\n')
-          console.table(res);
+const addDepartment = () => {
+  inquirer
+      .prompt([
+          {
+              type: 'input',
+              name: 'newDepartment',
+              message: 'What is the new department name?'
+          },
+      ])
+      .then((data) => {
+          connection.query('INSERT INTO department SET ?',
+              {
+                  name: data.newDepartment,
+              },
+              function (err) {
+                  if (err) throw err;
+              }
+          );
+          console.log('New department added to employee_db database.')
+          viewDepartment();
       });
+};
 
-  departmentTable();
-}
+connection.connect((err) => {
+  if (err) throw err;
+
+});
 
 // Add a role
 
 // Add an employee
+
+// Classes
+class Department{
+  constructor(name){
+      this.name = name;
+  }
+}
+
+module.exports = Department;
+
+class Role {
+  constructor(title, salary, department_id) {
+      this.title = title;
+      this.salary = salary;
+      this.department_id = department_id;
+  }
+}
+
+module.exports = Role;
+
+class Employee {
+  constructor(first_name, last_name, role_id, manager_id) {
+      this.first_name = first_name;
+      this.last_name = last_name;
+      this.role_id = role_id;
+      this.manager_id = manager_id;
+  }
+}
+
+module.exports = Employee;
